@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import Player from '../entities/Player.js';
 import Enemy from '../entities/Enemy.js';
 import Bullet from '../entities/Bullet.js';
+import CoverBlock from '../entities/CoverBlock.js';
 import { LEVELS, TOTAL_LEVELS } from '../config/levels.js';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS, ENEMY, BULLET } from '../config/constants.js';
 
@@ -28,6 +29,13 @@ export default class GameScene extends Phaser.Scene {
 
     // World bounds
     this.physics.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+    // Cover blocks
+    this.coverGroup = this.physics.add.staticGroup({ classType: CoverBlock });
+    for (const def of level.coverBlocks || []) {
+      const block = new CoverBlock(this, def.x, def.y, def.w, def.h);
+      this.coverGroup.add(block);
+    }
 
     // Player
     this.player = new Player(this, GAME_WIDTH / 2, GAME_HEIGHT / 2);
@@ -58,6 +66,8 @@ export default class GameScene extends Phaser.Scene {
     // Collisions
     this.physics.add.overlap(this.bullets, this.enemies, this.onBulletHitsEnemy, null, this);
     this.physics.add.overlap(this.player, this.enemies, this.onEnemyHitsPlayer, null, this);
+    this.physics.add.collider(this.player, this.coverGroup);
+    this.physics.add.collider(this.enemies, this.coverGroup);
 
     // Input: shoot
     this.input.on('pointerdown', this.fireBullet, this);
