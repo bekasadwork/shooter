@@ -148,9 +148,11 @@ export default class GameScene extends Phaser.Scene {
     if (pointer.button !== 0) return; // left click only
     const result = this.player.tryShoot(this.time.now, pointer.positionToCamera(this.cameras.main));
     if (!result) return;
-    const bullet = this.bullets.get(result.x, result.y, 'bullet');
-    if (!bullet) return;
-    bullet.fire(result.x, result.y, result.angle);
+    for (const shot of result.shots) {
+      const bullet = this.bullets.get(shot.x, shot.y, 'bullet');
+      if (!bullet) continue;
+      bullet.fire(shot.x, shot.y, shot.angle);
+    }
   }
 
   onBulletHitsEnemy(bullet, enemy) {
@@ -234,8 +236,10 @@ export default class GameScene extends Phaser.Scene {
       const aim = ap.positionToCamera(this.cameras.main);
       const result = this.player.tryShoot(this.time.now, aim);
       if (result) {
-        const bullet = this.bullets.get(result.x, result.y, 'bullet');
-        if (bullet) bullet.fire(result.x, result.y, result.angle);
+        for (const shot of result.shots) {
+          const bullet = this.bullets.get(shot.x, shot.y, 'bullet');
+          if (bullet) bullet.fire(shot.x, shot.y, shot.angle);
+        }
       }
     }
 
