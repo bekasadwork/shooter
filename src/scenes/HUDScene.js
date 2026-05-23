@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, COLORS } from '../config/constants.js';
+import { GAME_WIDTH, COLORS, POWERUP } from '../config/constants.js';
 
 export default class HUDScene extends Phaser.Scene {
   constructor() {
@@ -15,17 +15,24 @@ export default class HUDScene extends Phaser.Scene {
     const barWidth = 220;
     const barHeight = 16;
 
-    // HP label
     this.add.text(padding, padding, 'HP', {
       fontFamily: 'monospace',
       fontSize: '14px',
       color: '#e6e6f0',
     });
-    // HP background
     this.add.rectangle(padding + 30, padding + 7, barWidth, barHeight, 0x000000, 0.5).setOrigin(0, 0.5);
     this.hpBar = this.add
       .rectangle(padding + 30, padding + 7, barWidth, barHeight, COLORS.hudGood)
       .setOrigin(0, 0.5);
+
+    const stripY = padding + 30;
+    this.tripleIcon = this.add.image(padding + 10, stripY + 12, 'pickup-triple').setVisible(false);
+    this.tripleBarBg = this.add.rectangle(padding + 28, stripY + 12, 60, 6, 0x000000, 0.5).setOrigin(0, 0.5).setVisible(false);
+    this.tripleBar = this.add.rectangle(padding + 28, stripY + 12, 60, 6, 0xffa040).setOrigin(0, 0.5).setVisible(false);
+
+    this.shieldIcon = this.add.image(padding + 10, stripY + 36, 'pickup-shield').setVisible(false);
+    this.shieldBarBg = this.add.rectangle(padding + 28, stripY + 36, 60, 6, 0x000000, 0.5).setOrigin(0, 0.5).setVisible(false);
+    this.shieldBar = this.add.rectangle(padding + 28, stripY + 36, 60, 6, 0x4da6ff).setOrigin(0, 0.5).setVisible(false);
 
     this.levelText = this.add.text(GAME_WIDTH / 2, padding, '', {
       fontFamily: 'monospace',
@@ -65,5 +72,20 @@ export default class HUDScene extends Phaser.Scene {
     const remaining = Math.max(0, level.killsToAdvance - this.gameScene.kills);
     this.killsText.setText(`KILLS LEFT: ${remaining}`);
     this.scoreText.setText(`SCORE: ${this.gameScene.score}`);
+
+    const now = this.gameScene.time.now;
+    const tripleLeft = Math.max(0, player.tripleUntil - now);
+    const tripleActive = tripleLeft > 0;
+    this.tripleIcon.setVisible(tripleActive);
+    this.tripleBarBg.setVisible(tripleActive);
+    this.tripleBar.setVisible(tripleActive);
+    if (tripleActive) this.tripleBar.width = 60 * (tripleLeft / POWERUP.tripleMs);
+
+    const shieldLeft = Math.max(0, player.shieldUntil - now);
+    const shieldActive = shieldLeft > 0;
+    this.shieldIcon.setVisible(shieldActive);
+    this.shieldBarBg.setVisible(shieldActive);
+    this.shieldBar.setVisible(shieldActive);
+    if (shieldActive) this.shieldBar.width = 60 * (shieldLeft / POWERUP.shieldMs);
   }
 }
