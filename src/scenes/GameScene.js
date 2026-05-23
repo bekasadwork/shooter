@@ -3,8 +3,9 @@ import Player from '../entities/Player.js';
 import Enemy from '../entities/Enemy.js';
 import Bullet from '../entities/Bullet.js';
 import CoverBlock from '../entities/CoverBlock.js';
+import Powerup from '../entities/Powerup.js';
 import { LEVELS, TOTAL_LEVELS } from '../config/levels.js';
-import { GAME_WIDTH, GAME_HEIGHT, COLORS, ENEMY, BULLET } from '../config/constants.js';
+import { GAME_WIDTH, GAME_HEIGHT, COLORS, ENEMY, BULLET, POWERUP } from '../config/constants.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -79,6 +80,10 @@ export default class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.coverGroup);
     this.physics.add.collider(this.enemies, this.coverGroup);
     this.physics.add.collider(this.bullets, this.coverGroup, this.onBulletHitsCover, null, this);
+
+    // Powerup pickups
+    this.powerups = this.physics.add.group({ classType: Powerup, runChildUpdate: false });
+    this.physics.add.overlap(this.player, this.powerups, this.onPickup, null, this);
 
     // Input: shoot
     this.input.on('pointerdown', this.fireBullet, this);
@@ -182,11 +187,47 @@ export default class GameScene extends Phaser.Scene {
     const killed = enemy.takeDamage(BULLET.damage);
     if (killed) {
       this.deathEmitter.emitParticleAt(enemy.x, enemy.y, 14);
+      const dx = enemy.x;
+      const dy = enemy.y;
       enemy.die();
       this.kills += 1;
       this.score += 10;
+      this.maybeDropPowerup(dx, dy);
       this.checkLevelComplete();
     }
+  }
+
+  maybeDropPowerup(x, y) {
+    if (Math.random() >= POWERUP.dropChance) return;
+    const types = ['health', 'triple', 'shield'];
+    const type = types[Math.floor(Math.random() * types.length)];
+    const p = new Powerup(this, x, y, type);
+    this.powerups.add(p);
+  }
+
+  onPickup(_player, powerup) {
+    if (!powerup.active) return;
+    const result = powerup.applyTo(this.player, this.time.now);
+    this.showFloatingText(powerup.x, powerup.y, result.label, result.color);
+    powerup.destroy();
+  }
+
+  showFloatingText(x, y, label, color) {
+    const txt = this.add.text(x, y - 10, label, {
+      fontFamily: 'monospace',
+      fontSize: '16px',
+      color,
+      stroke: '#000',
+      strokeThickness: 3,
+    }).setOrigin(0.5);
+    this.tweens.add({
+      targets: txt,
+      y: y - 50,
+      alpha: { from: 1, to: 0 },
+      duration: 900,
+      ease: 'Cubic.easeOut',
+      onComplete: () => txt.destroy(),
+    });
   }
 
   onEnemyHitsPlayer(player, enemy) {
