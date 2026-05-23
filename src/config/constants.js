@@ -37,3 +37,27 @@ export const ENEMY = {
   contactDamage: 20,
   separationStrength: 60,
 };
+
+export const TANK = {
+  hullW: 36,
+  hullH: 28,
+  turretW: 14,
+  turretH: 22,
+  barrelLen: 18,
+  turnRateRad: 6,
+};
+
+export const COVER = {
+  fill: 0x1c1c38,
+  edge: 0x00ffe0,
+  edgeAlpha: 0.9,
+};
+
+export const POWERUP = {
+  dropChance: 0.12,
+  healthAmount: 30,
+  tripleMs: 10000,
+  shieldMs: 8000,
+  tripleSpreadRad: Math.PI / 18,
+  iconSize: 22,
+};
