@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEON SHOOTER</title>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: #0b0b12;
+        height: 100%;
+        overflow: hidden;
+        font-family: ui-monospace, "Cascadia Mono", "JetBrains Mono", Menlo, monospace;
+        color: #e6e6f0;
+      }
+      #game {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
+      canvas {
+        image-rendering: pixelated;
+        box-shadow: 0 0 40px #00ffe066, 0 0 4px #00ffe0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="game"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
