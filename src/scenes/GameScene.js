@@ -63,11 +63,22 @@ export default class GameScene extends Phaser.Scene {
       emitting: false,
     });
 
+    // Sparks when bullets hit cover
+    this.sparkEmitter = this.add.particles(0, 0, 'spark', {
+      speed: { min: 60, max: 160 },
+      lifespan: 250,
+      scale: { start: 1, end: 0 },
+      tint: [0x00ffe0, 0xffffff],
+      blendMode: 'ADD',
+      emitting: false,
+    });
+
     // Collisions
     this.physics.add.overlap(this.bullets, this.enemies, this.onBulletHitsEnemy, null, this);
     this.physics.add.overlap(this.player, this.enemies, this.onEnemyHitsPlayer, null, this);
     this.physics.add.collider(this.player, this.coverGroup);
     this.physics.add.collider(this.enemies, this.coverGroup);
+    this.physics.add.collider(this.bullets, this.coverGroup, this.onBulletHitsCover, null, this);
 
     // Input: shoot
     this.input.on('pointerdown', this.fireBullet, this);
@@ -188,6 +199,12 @@ export default class GameScene extends Phaser.Scene {
         this.gameOver();
       }
     }
+  }
+
+  onBulletHitsCover(bullet, _block) {
+    if (!bullet.active) return;
+    this.sparkEmitter.emitParticleAt(bullet.x, bullet.y, 6);
+    bullet.kill();
   }
 
   checkLevelComplete() {
